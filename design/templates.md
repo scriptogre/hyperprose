@@ -381,4 +381,4 @@ t"{post.html_content:safe}"
 
 ---
 
-**[← Previous: Routing](02-routing.md)** | **[Back to Index](README.md)** | **[Next: Dependency Injection →](05-dependency-injection.md)**
+**[← Previous: Routing](routing.md)** | **[Next: Content →](content.md)**

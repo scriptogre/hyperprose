@@ -71,6 +71,7 @@ This guide uses `...`.
 # app/pages/index.py
 
 from app.pages import Layout
+
 t"""
 <{Layout}>
     <h1>Welcome Home!</h1>
@@ -134,7 +135,7 @@ t"""
 
 ## Shorthand Props
 
-You can skip the attribute name if the variable matches it.
+Skip the attribute name if the variable matches it.
 
 ```python
 # app/pages/index.py
@@ -154,7 +155,7 @@ This expands to `title={title}`.
 
 ## Default Slot Content
 
-Use tag syntax to give the slot fallback content:
+Give slots fallback content:
 
 ```python
 # app/pages/Layout.py
@@ -162,7 +163,7 @@ Use tag syntax to give the slot fallback content:
 t"""
 <body>
     <{...}>
-        <p>This is default content if slot is empty.</p>
+        <p>Default content if slot is empty.</p>
     </{...}>
 </body>
 """
@@ -186,12 +187,8 @@ t"""
         {...}
     </main>
 </body>
-
 """
-
 ```
-
-
 
 ```python
 # app/pages/index.py
@@ -240,7 +237,7 @@ t"""
 Potential future idea (more magic, still to explore):
 
 ```python
-title: str = (t"Blog - {...} if ... else "Blog")
+title: str = (t"Blog - {...}" if ... else "Blog")
 ```
 
 ***
@@ -261,7 +258,7 @@ t"""
 """
 ```
 
-Note: The functionality of `...` depends on the context where it's used.
+The `{...}` spreads attributes and content based on context.
 
 ## Use a Component
 
@@ -302,6 +299,8 @@ t"""
 """
 ```
 
+Alternative syntax: `{@: for {item} in {items}}`
+
 ***
 
 ## Conditionals
@@ -311,7 +310,7 @@ is_admin: bool
 
 t"""
 <nav>
-    <!--@ if {'is_admin'} -->
+    <!--@ if {is_admin} -->
         <a href="/admin">Admin</a>
     <!--@ else -->
         <a href="/account">Account</a>
@@ -320,13 +319,15 @@ t"""
 """
 ```
 
-Alternative syntax:
-- `{@: if {condition}}`
-- `{@: for {item} in {items}}`
+Alternative syntax: `{@: if {condition}}`
 
 ***
 
-## Advanced Attributes
+# Advanced Attributes
+
+## Spread Attributes
+
+Spread attributes from a component to its root element.
 
 ```python
 # app/components/Button.py
@@ -337,6 +338,8 @@ t"""
 </button>
 """
 ```
+
+Attributes passed to the component merge with existing ones:
 
 ```python
 from app.components import Button
@@ -354,43 +357,59 @@ t"""
 # </button>
 ```
 
-### Conditional Classes
+Classes merge. Other attributes override.
+
+***
+
+## Conditional Classes
+
+Combine class strings, arrays, and objects:
 
 ```python
-# app/components/Button.py
-
-_class = ["bg-neutral-950 text-neutral-100", "border border-neutral-900", {"active": False, "disabled": True}]
+_class = [
+    "bg-neutral-950 text-neutral-100",
+    "border border-neutral-900",
+    {"active": False, "disabled": True}
+]
 
 t'<button class={_class}>Click</button>'
+
+# <button class="bg-neutral-950 text-neutral-100 border border-neutral-900 disabled">
+#   Click
+# </button>
 ```
 
-Note: `class` is a reserved keyword in Python.
+Use `_class` because `class` is a Python keyword.
 
-### Dynamic Styles
+***
+
+## Dynamic Styles
+
+Pass style object:
 
 ```python
 style = {"color": "red", "font-weight": "bold"}
 
-t"""
-<p {style}>Important</p>
-"""
+t'<p {style}>Important</p>'
+
 # <p style="color:red;font-weight:bold">Important</p>
 ```
 
-### Data Attributes
+***
 
-TODO: Decide what's the default - flat or JSON string?
-TODO 2: Decide name for changing format
+## Data Attributes
+
+Single data attribute:
 
 ```python
 state = "success"
 
-t"""
-<div data-state={state}>...</div>
-"""
+t'<div data-state={state}>...</div>'
 
 # <div data-state="success">...</div>
 ```
+
+Multiple data attributes:
 
 ```python
 data = {
@@ -401,132 +420,92 @@ data = {
     "state": "success",
 }
 
-t"""
-<div {data}>...</div>
-"""
-# <div data-user='{"id":"Aaron","role":"admin"}' data-state="success">...</div>
+t'<div {data}>...</div>'
 
-t"""
-<div {data:flat}>...</div>
-"""
-# <div data-user-id="Aaron" data-user-role="admin" data-state="success">Content</div>
+# <div data-user='{"id":"Aaron","role":"admin"}' data-state="success">...</div>
 ```
 
-### Spread Attributes
+Flatten nested objects:
 
 ```python
+t'<div {data:flat}>...</div>'
 
+# <div data-user-id="Aaron" data-user-role="admin" data-state="success">...</div>
+```
+
+***
+
+## Spread Attributes
+
+Spread multiple attributes at once:
+
+```python
 attrs = {
     "href": "https://example.com",
     "target": "_blank",
 }
 
 t'<a {attrs}>Link</a>'
-# <a href="https://examples.com" target="_blank">Link</a>
+
+# <a href="https://example.com" target="_blank">Link</a>
 ```
 
+***
 
+## Boolean Attributes
 
-### Boolean Attributes
+`True` renders the attribute. `False` omits it.
 
 ```python
-
 t'<input disabled={True} readonly={False} />'
 
 # <input disabled>
-
 ```
-
-
 
 ***
 
+# Comments
 
-
-## Comments
-
-
-
-HTML comments are sent to the browser.
-
-
+HTML comments are sent to the browser:
 
 ```python
-
 t"""
-
 <!-- This appears in page source -->
-
 <h1>Title</h1>
-
 """
-
 ```
 
-
-
-Server-side comments are stripped from output.
-
-
+Server-side comments are stripped from output:
 
 ```python
-
 t"""
-
 <!--# This won't appear in page source -->
-
 <h1>Title</h1>
-
 """
-
 ```
 
-
-
-Use directive comments for control flow.
-
-
+Use directive comments for control flow:
 
 ```python
-
 t"""
-
 <!--@ if {show_title} -->
-
   <h1>Title</h1>
-
 <!--@ end -->
-
 """
-
 ```
-
-
 
 ***
 
-
-
-# Escaping & trusted HTML
-
-
+# Escaping & Trusted HTML
 
 Hyper escapes interpolated values by default.
 
-To render trusted HTML, use the `:safe` format specifier:
-
-
+Render trusted HTML with `:safe`:
 
 ```python
-
 t"{post.html_content:safe}"
-
 ```
 
-
-
 ---
-
-
 
 **[← Previous: Routing](routing.md)** | **[Next: Content →](content.md)**
